@@ -188,8 +188,8 @@ async def analyze_molecules(request: MolMimRequest):
                 "optimized_property": request.property_to_optimize,
                 "algorithm": request.algorithm
             },
-            "analysis_result": final_analysis,       
-            "generated_molecules": molecules_for_frontend 
+            "generated_molecules": molecules_for_frontend,
+            "analysis_result": final_analysis       
         }
         
     except Exception as e:
