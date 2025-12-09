@@ -1,0 +1,29 @@
+# Gunakan Python 3.10 slim
+FROM python:3.10-slim
+
+# Biar Python nggak nyimpen .pyc dan output keliatan di log
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Set working directory di dalam container
+WORKDIR /app
+
+# Install dependency OS (kalau nanti butuh compile lib)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy file requirements dulu (biar layer cache kepake)
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Baru copy semua source code
+COPY . .
+
+# Expose port FastAPI
+EXPOSE 8000
+
+# Command jalanin server
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
