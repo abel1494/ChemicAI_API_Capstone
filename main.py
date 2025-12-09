@@ -13,7 +13,7 @@ from typing import Literal
 GEMINI_MODEL_ID = "gemini-2.5-flash"
 MOLMIM_CLOUD_ENDPOINT = "https://health.api.nvidia.com/v1/biology/nvidia/molmim/generate" 
 
-# DATA CADANGAN (DIPERBANYAK JADI 10 UNTUK DEMO)
+# DATA CADANGAN
 SIMULATED_MOL_DATA = """
 [
   {"sample": "CCN(CC)C(=O)N[C@@H]1CCc2c1cccc2C(F)(F)F", "score": 0.905},
@@ -36,29 +36,16 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# MODEL INPUT (SESUAI REQUEST USER)
+# MODEL INPUT
 class MolMimRequest(BaseModel):
     smi_string: str = Field(..., example="O=C(Oc1ccccc1C(=O)O)C", description="SMILES input user")
     
-    # Parameter 1-100
     num_molecules: int = Field(50, ge=1, le=100, description="Jumlah generate (1-100)")
-    
-    # Pilihan Algoritma (CMA-ES atau Spherical/Standard Deviation)
     algorithm: Literal["CMA-ES", "Spherical"] = Field("CMA-ES", description="Algoritma Sampling")
-    
-    # Properti (QED atau plogP)
     property_to_optimize: Literal["QED", "plogP"] = Field("QED", description="Target optimasi")
-    
-    # Maximize/Minimize (User pilih Maximize = minimize: False)
     minimize: bool = Field(False, description="Set False untuk Maximize properti")
-    
-    # Similarity (0.0 - 1.0)
     min_similarity: float = Field(0.3, ge=0.0, le=1.0, description="Similarity constraint (0-1)")
-    
-    # Partikel (20 - 1000)
     particles: int = Field(30, ge=20, le=1000, description="Jumlah partikel")
-    
-    # Iterasi (1 - 100)
     iterations: int = Field(10, ge=1, le=100, description="Jumlah iterasi")
 
 # FUNGSI API CALL
@@ -79,7 +66,7 @@ def call_molmim_api(params: MolMimRequest) -> str:
         "particles": params.particles,
         "minimize": params.minimize,
         "min_similarity": params.min_similarity,
-        "scaled_radius": 1, # Default parameter
+        "scaled_radius": 1,
         "smi": params.smi_string
     }
     
@@ -128,8 +115,8 @@ def process_molmim_results(json_string: str) -> list:
                 unique_mols.append(m)
                 seen.add(smi)
 
-        return unique_mols # Mengembalikan list object Python
-        
+        return unique_mols 
+      
     except Exception as e:
         print(f"   ❌ Error parsing JSON: {e}")
         return json.loads(SIMULATED_MOL_DATA)
@@ -141,20 +128,19 @@ async def analyze_molecules(request: MolMimRequest):
     if not os.environ.get("GOOGLE_API_KEY"):
         raise HTTPException(status_code=500, detail="Server Error: GOOGLE_API_KEY belum diset.")
 
-    # 1. Generate & Dapatkan List Lengkap
+    # Generate & Dapatkan List Lengkap
     raw_json_string = call_molmim_api(request)
     all_sorted_molecules = process_molmim_results(raw_json_string)
     
-    # 2. Siapkan Data untuk Frontend (Top 10)
+    # Siapkan Data untuk Frontend (Top 10)
     molecules_for_frontend = all_sorted_molecules[:10]
     
-    # 3. Siapkan Data untuk Analisis Gemini (Top 5)
+    # Siapkan Data untuk Analisis Gemini (Top 5)
     molecules_for_analysis = all_sorted_molecules[:5]
     analysis_input_string = json.dumps(molecules_for_analysis, indent=2)
 
-    # 4. Analisis Gemini
+    # Analisis Gemini
     llm = ChatGoogleGenerativeAI(model=GEMINI_MODEL_ID)
-    
     analysis_prompt = ChatPromptTemplate.from_template(
         """Anda adalah ahli kimia komputasi.
         
