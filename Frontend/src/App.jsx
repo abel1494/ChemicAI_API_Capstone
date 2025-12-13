@@ -89,7 +89,7 @@ const HeroSection = ({ onStartClick, isDarkMode }) => {
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </button>
           <button
-            onClick={() => window.open('https://www.youtube.com/watch?v=7Ua-DhKWMvk', '_blank')}
+            onClick={() => window.open('https://docs.google.com/document/d/1coGpQAYDT_gulMXHHEhKN2wW-sK8XUn00fipQeknzkM/edit?usp=sharing', '_blank')}
             className={`px-8 py-4 border-2 font-medium rounded-xl transition flex items-center gap-2 hover:bg-fuchsia-500 hover:border-fuchsia-500 hover:text-white ${isDarkMode ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-600'}`}
           >
             <div className="relative overflow-hidden">
@@ -605,5 +605,6 @@ function App() {
     </>
   );
 }
+
 
 export default App;
